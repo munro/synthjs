@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<body>
+<head>
+<script src="swfobject.js"></script>
+<script src="jquery.js"></script>
+<script>
+var buffer = new Array(8192);
+var counter = 0;
+
+function ModuleWrapper(width, height) {
+    return {
+        draw: function (ctx) {
+            // Background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0.5, 0.5, width, height);
+            
+            // Clipping
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(width, 0);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.clip();
+
+            // Widgets
+            // module.draw();
+            ctx.fillStyle = 'black';
+            ctx.font = '10px Monospace';
+            ctx.fillText('Hello Wooorld', 10, 15);
+            
+            // Border
+            ctx.restore();
+            ctx.strokeRect(0.5, 0.5, width, height);
+        }
+    };
+}
+
+function fillAudioBuffer() {
+    var i;
+    for (i = 0; i < buffer.length; i += 1) {
+        buffer[i]  = Math.sin((counter * buffer.length + i) / Math.PI / 8);
+    }
+    counter++;
+    return buffer;
+}
+
+var module = ModuleWrapper(100, 100);
+
+function redraw(resize) {
+    var canvas = $('canvas')[0],
+        ctx = canvas.getContext('2d');
+
+    if (typeof resize !== 'undefined' && resize) {
+        canvas.width = $(window).width();
+        canvas.height = $(window).height();
+    }
+    ctx.scale(2.0, 2.0);
+    ctx.beginPath();
+    ctx.moveTo(75,50);
+    ctx.lineTo(120,75);
+    ctx.lineTo(100,25);
+    ctx.fill();
+
+    ctx.font = '15px Monospace';
+    ctx.fillText('hello world', 20, 20);
+    
+    ctx.translate(100, 100);
+    module.draw(ctx);
+}
+
+$(window).resize(function () {
+    redraw(true);
+});
+
+$(function () {
+    var flashvars = {};
+    var params = {
+        allowscriptaccess: 'always'
+    };
+    var attributes = {};
+    //swfobject.embedSWF('swf/Speaker.swf', 'Speaker', '300', '300', '9.0.0', 'swf/expressInstall.swf', flashvars, params, attributes);
+    redraw(true);
+});
+</script>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+canvas {
+    background-color: red;
+}
+#Speaker {
+    position: absolute;
+    left: -10000px;
+}
+</style>
+</head>
+<body>
+<div id="Speaker" style="border: 1px solid black;"></div>
+<canvas id="tutorial"></canvas>
+</body>
+</html>
