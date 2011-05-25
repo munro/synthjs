@@ -4,8 +4,6 @@
 <script src="swfobject.js"></script>
 <script src="jquery.js"></script>
 <script>
-var buffer = new Array(8192);
-var counter = 0;
 
 function ModuleWrapper(width, height) {
     return {
@@ -36,12 +34,30 @@ function ModuleWrapper(width, height) {
     };
 }
 
+var buffer = new Array(5500);
+var counter = 0;
+
+function sample(time) {
+    return Math.sin(time / Math.PI * 4000 * (((time * 2) >> 0) % 8 + 1)) * 0.5;
+}
+
+function sample2(time) {
+    var val = Math.sin(0.5 + time / Math.PI * 2000 * ((((time + 0.5) * 0.25) >> 0) % 3 + 1));
+    return (val > 0 ? 0.25 : -0.25) * 0.5;
+}
+
 function fillAudioBuffer() {
     var i;
+    var start = (new Date()).getTime();
     for (i = 0; i < buffer.length; i += 1) {
-        buffer[i]  = Math.sin((counter * buffer.length + i) / Math.PI / 8);
+        buffer[i] = sample((counter++) / 44000);
+        buffer[i] += sample2((counter++) / 44000);
+        //buffer[i] = sample(counter);
+        //counter += 0.00001;
+        //buffer[i]  = Math.sin((counter * buffer.length + i) / Math.PI / 8);
     }
-    counter++;
+    start = (new Date()).getTime() - start;
+    console.log('filled ' + (((buffer.length / 44000) * 1000) >> 0) + ' ms of audio in ' + start + ' ms');
     return buffer;
 }
 
@@ -79,7 +95,7 @@ $(function () {
         allowscriptaccess: 'always'
     };
     var attributes = {};
-    //swfobject.embedSWF('swf/Speaker.swf', 'Speaker', '300', '300', '9.0.0', 'swf/expressInstall.swf', flashvars, params, attributes);
+    swfobject.embedSWF('swf/Speaker.swf', 'Speaker', '300', '300', '9.0.0', 'swf/expressInstall.swf', flashvars, params, attributes);
     redraw(true);
 });
 </script>
